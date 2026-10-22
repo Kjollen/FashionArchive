@@ -1,0 +1,2 @@
+# FashionArchive
+Server Configuration Template
