@@ -2,29 +2,52 @@
 
 Приложение для сохранения и каталогизации фотографий с модных показов, идей для шитья, вязания и создания бижутерии.
 
-## 🚀 Деплой на сервер
+**Домен:** `fashionarchive.duckdns.org` (или любой другой, который ты настроила)
 
-### 1. Клонирование и сборка
+---
+
+## 🚀 Деплой на сервер (пошагово)
+
+### Шаг 1. Подключаемся к серверу
+
+Открой терминал (Mac/Linux) или PowerShell (Windows) и подключись:
+
+```bash
+ssh root@31.59.126.197
+```
+
+Введи пароль от сервера.
+
+### Шаг 2. Клонируем приложение
 
 ```bash
 cd /usr/src/code
-git clone https://github.com/КОНЕЧНО/ВАШ.git fashionarchive
-cd fashionarchive
+git clone https://github.com/Kjollen/FashionArchive.git
+cd FashionArchive
+```
+
+### Шаг 3. Собираем приложение
+
+```bash
 nvm use 18
 npm install
 npm run build
 ```
 
-### 2. Копирование в папку сайта
+### Шаг 4. Копируем файлы в папку сайта
 
 ```bash
 mkdir -p /var/www/fashionarchive
 cp -r dist/* /var/www/fashionarchive/
 ```
 
-### 3. Настройка Nginx
+### Шаг 5. Создаём конфиг Nginx
 
-Создайте конфиг `/etc/nginx/sites-available/fashionarchive`:
+```bash
+nano /etc/nginx/sites-available/fashionarchive
+```
+
+Вставь этот текст:
 
 ```nginx
 server {
@@ -60,43 +83,81 @@ server {
 }
 ```
 
+Сохрани: **Ctrl+O** → Enter → **Ctrl+X**
+
+### Шаг 6. Включаем сайт
+
 ```bash
 ln -s /etc/nginx/sites-available/fashionarchive /etc/nginx/sites-enabled/
 sudo nginx -t
 sudo systemctl reload nginx
+```
+
+### Шаг 7. Получаем HTTPS
+
+```bash
 certbot --nginx -d fashionarchive.duckdns.org --redirect
 ```
 
-### 4. Настройка PocketBase
+Следуй инструкциям (введи email, согласись с условиями).
 
-#### Создайте коллекцию `entries`:
+✅ **Готово!** Открой https://fashionarchive.duckdns.org
 
-Зайдите в админку PocketBase (через SSH туннель):
+---
+
+## 🔐 Настройка PocketBase
+
+### 1. Подключаемся через SSH-туннель
+
+На своём компьютере (НЕ на сервере):
+
 ```bash
 ssh -L 8090:localhost:8090 root@31.59.126.197
-# Откройте http://localhost:8090/_/
 ```
 
-**Поля коллекции `entries`:**
+Открой в браузере: **http://localhost:8090/_/**
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| `title` | Text | Название показа (SS27, FW26-27...) |
-| `designer` | Text | Дизайнер (CHANEL, DIOR...) |
-| `tags` | JSON | Массив тегов |
-| `section` | Select | `show` (показ) или `idea` (идея) |
-| `photos` | File (multiple) | Фотографии |
-| `notes` | Text (long) | Заметки |
+### 2. Создаём коллекцию пользователей
 
-**API Rules для `entries`:**
-- List: `@request.auth.id != ""`
-- View: `@request.auth.id != ""`
-- Create: `@request.auth.id != ""`
-- Update: `@request.auth.id != ""`
-- Delete: `@request.auth.id != ""`
+1. Слева: **Collections** → кнопка **"New collection"**
+2. Название: `fashion_users`
+3. Тип: **Auth** (обязательно!)
+4. Нажми **"Create"**
 
-#### Создайте пользователя:
-В админке PocketBase → Collections → users → Create
+### 3. Создаём коллекцию записей
+
+1. Снова **"New collection"**
+2. Название: `entries`
+3. Добавь поля (кнопка **"New field"**):
+
+| Поле | Тип поля | Настройки |
+|------|----------|-----------|
+| `title` | Text | — |
+| `designer` | Text | — |
+| `tags` | **JSON** | — |
+| `section` | **Select** | Добавь 2 варианта: `show` и `idea` |
+| `photos` | **File** | Max selects: 10 (или сколько хочешь) |
+| `notes` | Text | Поставь галочку "Present field as multi-line text" |
+
+4. Нажми **"Create"**
+
+### 4. Настраиваем права доступа
+
+Для коллекции **`entries`** нажми на иконку ключа 🔑 (API Rules) и везде поставь:
+```
+@request.auth.id != ""
+```
+
+### 5. Создаём свой аккаунт
+
+1. Слева выбери коллекцию **`fashion_users`**
+2. Кнопка **"New auth record"** (справа сверху)
+3. Введи email и пароль (минимум 10 символов)
+4. Сохрани
+
+✅ **Этот email и пароль** используй для входа в FashionArchive. Он изолирован от MoneyMap!
+
+---
 
 ## 📱 Использование
 
@@ -105,14 +166,15 @@ ssh -L 8090:localhost:8090 root@31.59.126.197
 - **Идеи** — идеи для шитья, вязания, бижутерии
 
 ### Загрузка
-1. Нажмите "Загрузить"
-2. Выберите раздел (Показ или Идея)
-3. Заполните поля (дизайнер, название показа, теги)
-4. Прикрепите фото (можно несколько — это будут ракурсы одной вещи)
-5. Нажмите "Сохранить"
+1. Нажми **"Войти"** → введи email и пароль из `fashion_users`
+2. Нажми **"Загрузить"**
+3. Выбери раздел (Показ или Идея)
+4. Заполни поля (дизайнер, название показа, теги)
+5. Прикрепи фото (можно несколько — это будут ракурсы одной вещи)
+6. Нажми **"Сохранить"**
 
 ### Автодополнение
-- Дизайнеры, названия показов и теги, которые вы уже использовали, автоматически появляются в выпадающих списках
+Дизайнеры, названия показов и теги, которые ты уже использовала, автоматически появляются в выпадающих списках.
 
 ### Фильтрация
 - По дизайнеру
@@ -126,6 +188,8 @@ ssh -L 8090:localhost:8090 root@31.59.126.197
 - Навигация между фото (стрелки)
 - Полоска миниатюр для групп из нескольких фото
 
+---
+
 ## 📸 Оптимизация фото
 
 При загрузке фотографии автоматически:
@@ -135,6 +199,8 @@ ssh -L 8090:localhost:8090 root@31.59.126.197
 
 При просмотре в сетке используются миниатюры (thumbs) от PocketBase.
 
+---
+
 ## 🔧 Технологии
 
 - React + TypeScript + Vite
@@ -142,3 +208,36 @@ ssh -L 8090:localhost:8090 root@31.59.126.197
 - PocketBase (бэкенд)
 - react-zoom-pan-pinch (зум фото)
 - Клиентская оптимизация изображений (Canvas API)
+
+---
+
+## ⚠️ Важные нюансы
+
+1. **Домен:** `fashionarchive.duckdns.org` (создай на duckdns.org)
+2. **PocketBase:** использует ту же базу, но отдельную auth-коллекцию `fashion_users`
+3. **Изоляция:** логины FashionArchive полностью независимы от MoneyMap
+4. **HTTPS:** настраивается через certbot (см. Шаг 7)
+5. **Nginx:** конфиг отдельный, не трогает MoneyMap
+
+---
+
+## 🐛 Если что-то сломалось
+
+```bash
+# Логи Nginx
+tail -30 /var/log/nginx/error.log
+
+# Проверить конфиг Nginx
+sudo nginx -t
+
+# Перезапустить Nginx
+sudo systemctl reload nginx
+
+# Проверить, что PocketBase работает
+sudo systemctl status pocketbase
+```
+
+---
+
+**Версия:** 1.0
+**Дата:** 2026

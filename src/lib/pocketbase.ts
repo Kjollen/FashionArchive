@@ -116,12 +116,15 @@ export function getFileUrl(record: any, filename: string, params?: { thumb?: str
   return pb.files.getUrl(record, filename, params);
 }
 
+// Используем отдельную auth-коллекцию для изоляции от MoneyMap
+const AUTH_COLLECTION = 'fashion_users';
+
 export async function login(email: string, password: string) {
-  return pb.collection('users').authWithPassword(email, password);
+  return pb.collection(AUTH_COLLECTION).authWithPassword(email, password);
 }
 
 export async function register(email: string, password: string) {
-  return pb.collection('users').create({
+  return pb.collection(AUTH_COLLECTION).create({
     email,
     password,
     passwordConfirm: password,
