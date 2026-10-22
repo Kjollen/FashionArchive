@@ -65,6 +65,15 @@ server {
 
     client_max_body_size 50M;
 
+    # Админка PocketBase (доступна по адресу https://fashionarchive.duckdns.org/admin/)
+    location /admin/ {
+        proxy_pass http://127.0.0.1:8090/_/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
     # API PocketBase
     location /api/ {
         proxy_pass http://127.0.0.1:8090/api/;
@@ -107,15 +116,13 @@ certbot --nginx -d fashionarchive.duckdns.org --redirect
 
 ## 🔐 Настройка PocketBase
 
-### 1. Подключаемся через SSH-туннель
+### 1. Открой админку PocketBase
 
-На своём компьютере (НЕ на сервере):
+После того как сайт заработает, открой в браузере:
 
-```bash
-ssh -L 8090:localhost:8090 root@31.59.126.197
-```
+**https://fashionarchive.duckdns.org/admin/**
 
-Открой в браузере: **http://localhost:8090/_/**
+(Точно так же, как ты заходишь в админку MoneyMap по адресу https://moneymap-finance.duckdns.org/admin/)
 
 ### 2. Создаём коллекцию пользователей
 
