@@ -79,8 +79,8 @@ function App() {
       setEntries(result.items as unknown as Entry[]);
     } catch (e) {
       console.error('Failed to load entries:', e);
-      // Если PocketBase недоступен, показываем демо-данные
-      setEntries(getDemoEntries());
+      // Если PocketBase недоступен, показываем пустой список
+      setEntries([]);
     } finally {
       setLoading(false);
     }
@@ -112,7 +112,7 @@ function App() {
         return getFileUrl(entry, filename, params);
       } catch {
         // Fallback для демо
-        return `data:image/svg+xml,${encodeURIComponent(
+        return `image/svg+xml,${encodeURIComponent(
           `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="500" fill="#f3f4f6"><rect width="400" height="500"/><text x="200" y="250" text-anchor="middle" fill="#9ca3af" font-size="14">Фото</text></svg>`
         )}`;
       }
@@ -228,72 +228,6 @@ function App() {
       </footer>
     </div>
   );
-}
-
-// Demo entries when PocketBase is not available
-function getDemoEntries(): Entry[] {
-  return [
-    {
-      id: 'demo-1',
-      title: 'SS27',
-      designer: 'CHANEL',
-      tags: ['твид', 'костюм', 'пастель'],
-      section: 'show',
-      photos: [],
-      notes: 'Коллекция в пастельных тонах, много твида',
-      userId: '',
-      created: new Date().toISOString(),
-      updated: new Date().toISOString(),
-    },
-    {
-      id: 'demo-2',
-      title: 'FW26-27',
-      designer: 'DIOR',
-      tags: ['вечернее', 'чёрное', 'элегантное'],
-      section: 'show',
-      photos: [],
-      notes: 'Вечерние платья, минимализм',
-      userId: '',
-      created: new Date().toISOString(),
-      updated: new Date().toISOString(),
-    },
-    {
-      id: 'demo-3',
-      title: '',
-      designer: '',
-      tags: ['вязание', 'свитер', 'ажур'],
-      section: 'idea',
-      photos: [],
-      notes: 'Идея для ажурного свитера — перенести узор',
-      userId: '',
-      created: new Date().toISOString(),
-      updated: new Date().toISOString(),
-    },
-    {
-      id: 'demo-4',
-      title: 'SS27',
-      designer: 'PRADA',
-      tags: ['минимализм', 'белое', 'оверсайз'],
-      section: 'show',
-      photos: [],
-      notes: 'Белые рубашки оверсайз — крой!',
-      userId: '',
-      created: new Date().toISOString(),
-      updated: new Date().toISOString(),
-    },
-    {
-      id: 'demo-5',
-      title: '',
-      designer: '',
-      tags: ['бижутерия', 'серьги', 'металл'],
-      section: 'idea',
-      photos: [],
-      notes: 'Массивные металлические серьги — сделать самой',
-      userId: '',
-      created: new Date().toISOString(),
-      updated: new Date().toISOString(),
-    },
-  ];
 }
 
 export default App;
